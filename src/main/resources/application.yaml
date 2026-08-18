@@ -2,9 +2,9 @@ spring:
   application:
     name: backend
   datasource:
-    url: jdbc:postgresql://localhost:5432/crm_db
-    username: crm_user
-    password: crm_password
+    url: jdbc:postgresql://localhost:5432/crm
+    username: admin
+    password: admin
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
