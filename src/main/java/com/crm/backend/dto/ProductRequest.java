@@ -19,9 +19,9 @@ public class ProductRequest {
     @DecimalMin(value = "0.0" , inclusive = true , message = "Ürün fiyatı negatif olamaz")
     @Digits(integer = 8, fraction = 2,message = "Fiyat en fazla 2 ondalık basamak içerebilir")
     private BigDecimal price;
-
-    @NotBlank(message = "Stok durumu boş bırakılamaz")
-    @Pattern(regexp= "^(In Stock|Out of Stock)$",message = "Stok durumu sadece 'In Stock' veya 'Out of Stock' olabilir")
-    private String stock;
+    
+    @NotNull(message = "Stok boş bırakılamaz")
+    @Min(value = 0, message = "Stok negatif olamaz")
+    private Integer stock;
 
 }
