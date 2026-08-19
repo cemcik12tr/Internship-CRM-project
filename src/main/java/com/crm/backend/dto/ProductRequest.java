@@ -1,20 +1,27 @@
 package com.crm.backend.dto;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+import java.math.BigDecimal;
+
 
 @Data
 public class ProductRequest {
+    
+    @NotBlank(message = "Catalog ID boş bırakılamaz")
+    private String catalogId;
+
     @NotBlank(message = "Ürün adı boş bırakılamaz")
+    @Size(min = 2, max = 100, message = "Ürün adı 2 ile 100 karakter arasında olmalıdır")
     private String name;
 
     @NotNull(message = "Ürün ücreti boş bırakılamaz")
-    @Min(value =0 , message = "Ürün fiyatı negatif olamaz")
-    private Double price;
+    @DecimalMin(value = "0.0" , inclusive = true , message = "Ürün fiyatı negatif olamaz")
+    @Digits(integer = 8, fraction = 2,message = "Fiyat en fazla 2 ondalık basamak içerebilir")
+    private BigDecimal price;
 
-    @NotNull(message = "Stok adeti boş bırakılamaz")
-    @Min(value=0, message = "stok adeti negatif olamaz")
-    private Integer stock;
+    @NotBlank(message = "Stok durumu boş bırakılamaz")
+    @Pattern(regexp= "^(In Stock|Out of Stock)$",message = "Stok durumu sadece 'In Stock' veya 'Out of Stock' olabilir")
+    private String stock;
+
 }
