@@ -18,6 +18,9 @@ public class ProductService {
     //CRATE
     public Product createProduct(ProductRequest request){
         Product product = new Product();
+
+        String generetadSku = "PRD-"+ java.util.UUID.randomUUID().toString().substring(0,8).toUpperCase();
+        product.setSku(generetadSku);
         product.setIsActive(true);
         product.setName(request.getName());
         product.setPrice(request.getPrice());

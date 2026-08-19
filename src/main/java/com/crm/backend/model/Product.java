@@ -22,6 +22,9 @@ public class Product
     @Column(name = "catalog_id") 
     private Long catalogId;
 
+    @Column(name="sku" , unique = true, updatable = false)
+    private String sku;
+
     private String name;
     private Double price;
     private Integer stock;
@@ -89,7 +92,12 @@ public class Product
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
-
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+    public String getSku() {
+        return sku;
+    }
 
 
 }
