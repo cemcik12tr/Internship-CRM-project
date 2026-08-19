@@ -13,7 +13,6 @@ public class CustomerServiceImpl implements CustomerService {
 
 	private static final SecureRandom RANDOM = new SecureRandom();
 	private static final String NAME_PATTERN = "^[A-Za-zÇĞİÖŞÜçğıöşü ]{2,50}$";
-
 	private final CustomerRepository customerRepository;
 
 	public CustomerServiceImpl(CustomerRepository customerRepository) {
@@ -32,17 +31,13 @@ public class CustomerServiceImpl implements CustomerService {
 		customer.setNationalId(request.nationalId().trim());
 		customer.setGsmNumber(request.gsmNumber().trim());
 		customer.setFirstName(request.firstName().trim());
-		customer.setMiddleName(normalizeOptional(request.middleName()));
+		customer.setMiddleName(isBlank(request.middleName()) ? null : request.middleName().trim());
 		customer.setLastName(request.lastName().trim());
 		customer.setStatus(CustomerStatus.ACTIVE);
 		customer.setCreatedBy("system");
 
 		Customer savedCustomer = customerRepository.save(customer);
-		return new CreateCustomerResponse(
-				savedCustomer.getCustomerId(),
-				savedCustomer.getAccountNumber(),
-				savedCustomer.getStatus().name()
-		);
+		return new CreateCustomerResponse(savedCustomer.getCustomerId(),savedCustomer.getAccountNumber(),savedCustomer.getStatus().name());
 	}
 
 	private void validate(CreateCustomerRequest request) {
@@ -104,10 +99,6 @@ public class CustomerServiceImpl implements CustomerService {
 			value.append(RANDOM.nextInt(10));
 		}
 		return value.toString();
-	}
-
-	private String normalizeOptional(String value) {
-		return isBlank(value) ? null : value.trim();
 	}
 
 	private boolean isBlank(String value) {
