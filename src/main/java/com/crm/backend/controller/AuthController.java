@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000") // Adjust if your React port differs
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:5173"})
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -17,13 +17,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
-        LoginResponse response = authService.authenticateUser(loginRequest);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(authService.authenticateUser(loginRequest));
     }
-    @PostMapping("/unlock")
-    public ResponseEntity<?> unlockAccount(@RequestBody LoginRequest request) {
-        authService.unlockAccount(request.getUsername());
-        return ResponseEntity.ok("Account unlocked");
-    }
-
 }
