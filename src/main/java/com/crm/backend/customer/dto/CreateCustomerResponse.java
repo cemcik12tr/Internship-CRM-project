@@ -1,4 +1,8 @@
 package com.crm.backend.customer.dto;
 
-public record CreateCustomerResponse(String customerId,String accountNumber,String status) {
+public record CreateCustomerResponse(
+		String customerId,
+		String accountNumber,
+		String status
+) {
 }

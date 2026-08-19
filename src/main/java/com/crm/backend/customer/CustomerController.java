@@ -19,7 +19,7 @@ public class CustomerController {
 		this.customerService = customerService;
 	}
 
-	@PostMapping
+	@PostMapping("/create")
 	@ResponseStatus(HttpStatus.CREATED)
 	public CreateCustomerResponse createCustomer(@RequestBody CreateCustomerRequest request) {
 		return customerService.createCustomer(request);

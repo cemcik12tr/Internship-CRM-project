@@ -1,6 +1,5 @@
 package com.crm.backend.customer;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -8,7 +7,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
@@ -24,11 +22,14 @@ public class Customer {
 	@Column(name = "customer_id", nullable = false, unique = true, updatable = false)
 	private String customerId;
 
-	@Column(name = "national_id", nullable = false, unique = true, length = 11)
+	@Column(name = "national_id", nullable = false, length = 11)
 	private String nationalId;
 
-	@Column(name = "gsm_number", nullable = false, unique = true, length = 10)
+	@Column(name = "gsm_number", nullable = false, length = 10)
 	private String gsmNumber;
+
+	@Column(name = "account_number", unique = true, updatable = false)
+	private String accountNumber;
 
 	@Column(name = "first_name", nullable = false, length = 50)
 	private String firstName;
@@ -54,9 +55,6 @@ public class Customer {
 
 	@Column(name = "deleted_date")
 	private LocalDateTime deletedDate;
-
-	@OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-	private CustomerAccount account;
 
 	@PrePersist
 	void prePersist() {
@@ -97,6 +95,14 @@ public class Customer {
 
 	public void setGsmNumber(String gsmNumber) {
 		this.gsmNumber = gsmNumber;
+	}
+
+	public String getAccountNumber() {
+		return accountNumber;
+	}
+
+	public void setAccountNumber(String accountNumber) {
+		this.accountNumber = accountNumber;
 	}
 
 	public String getFirstName() {
@@ -161,16 +167,5 @@ public class Customer {
 
 	public void setDeletedDate(LocalDateTime deletedDate) {
 		this.deletedDate = deletedDate;
-	}
-
-	public CustomerAccount getAccount() {
-		return account;
-	}
-
-	public void setAccount(CustomerAccount account) {
-		this.account = account;
-		if (account != null) {
-			account.setCustomer(this);
-		}
 	}
 }
