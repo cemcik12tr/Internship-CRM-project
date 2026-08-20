@@ -33,11 +33,18 @@ public class ProductService {
         }
 
         Product product = new Product();
+<<<<<<< HEAD
        
         String generatedProductId = "PRD-" +  UUID.randomUUID().toString().substring(0,8).toUpperCase();
         product.setId(generatedProductId);
         
         product.setCatalog(catalog);
+=======
+
+        String generetadSku = "PRD-"+ java.util.UUID.randomUUID().toString().substring(0,8).toUpperCase();
+        product.setSku(generetadSku);
+        product.setIsActive(true);
+>>>>>>> 46dd9e398c7f12f99485923f768242b7d54960d5
         product.setName(request.getName());
         product.setPrice(request.getPrice());
         product.setStock(request.getStock());
