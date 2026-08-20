@@ -1,4 +1,9 @@
 package com.crm.backend.config;
+/*           
+
+    security.configde product kısımları için izin açsamda burası çakışıp sıkıntı çıkartıyordu geçici olarak kapattım.
+    -Batuhan-
+
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,3 +27,4 @@ public class WebConfig {
         };
     }
 }
+*/

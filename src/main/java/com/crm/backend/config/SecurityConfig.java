@@ -30,6 +30,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/catalogs/**").permitAll() // product aşamasının ilerleyebilmesi için geçici konmuştur
+                        .requestMatchers("/api/products/**").permitAll() // product aşamasının ilerleyebilmesi için geçici konmuştur
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/customers/**").permitAll()
