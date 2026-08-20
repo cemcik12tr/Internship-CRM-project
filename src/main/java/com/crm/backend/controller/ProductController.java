@@ -2,6 +2,7 @@ package com.crm.backend.controller;
 
 import com.crm.backend.dto.ProductRequest;
 import com.crm.backend.model.Product;
+import com.crm.backend.model.enums.Status;
 import com.crm.backend.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -46,5 +47,18 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> searcProducts(
+        @RequestParam(required = false) String id,
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) String catalogName,
+        @RequestParam(required = false) String stockStatus,
+        @RequestParam(required = false) Status status,
+        @RequestParam(required = false) java.math.BigDecimal minPrice,
+        @RequestParam(required = false) java.math.BigDecimal maxPrice
+    ){
+        return ResponseEntity.ok(productService.searchProducts(
+            id, name, catalogName, stockStatus, status, minPrice, maxPrice));
+    }
 
 }

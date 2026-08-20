@@ -4,7 +4,7 @@ import com.crm.backend.model.enums.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+
 
 import java.time.LocalDateTime;
 
@@ -29,10 +29,13 @@ public class Catalog {
     @Column(name = "created_date", updatable = false)
     private LocalDateTime createdDate;
 
-    @UpdateTimestamp
-    @Column(name = "updated_date")
+     @Column(name = "created_by", updatable = false)
+    private String createdBy;
+
+
+    @Column(name = "updated_date", nullable = true, insertable = false)
     private LocalDateTime updatedDate;
 
-    @Column(name = "updated_by")
+    @Column(name = "updated_by",nullable = true, insertable = false)
     private String updatedBy;
 }

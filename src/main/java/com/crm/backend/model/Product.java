@@ -32,7 +32,7 @@ public class Product
     private BigDecimal price;
 
     @Column(name = "stock_status", nullable = false)
-    private String stock;
+    private Integer stock;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -46,7 +46,7 @@ public class Product
     private String createdBy;
 
     @UpdateTimestamp
-    @Column(name = "updated_date") 
+    @Column(name = "updated_date" , nullable = true, insertable = false) 
     private LocalDateTime updatedDate;
 
     @Column(name = "updated_by")

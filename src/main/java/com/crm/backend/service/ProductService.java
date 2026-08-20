@@ -7,6 +7,7 @@ import com.crm.backend.model.enums.Status;
 import com.crm.backend.repository.CatalogRepository;
 import com.crm.backend.repository.ProductRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,7 +43,10 @@ public class ProductService {
         product.setStock(request.getStock());
         product.setStatus(Status.ACTIVE);
         product.setCreatedBy("system_user");
-
+        catalog.setUpdatedBy("system_user");
+        catalog.setUpdatedDate(LocalDateTime.now());
+        
+        catalogRepository.save(catalog);
         return productRepository.save(product);
     }
 
@@ -54,6 +58,7 @@ public class ProductService {
     }
 
     //UPDATE
+    @Transactional
     public Product updateProduct(String id, ProductRequest request){
 
         Product existingProduct = productRepository.findById(id)
@@ -63,12 +68,21 @@ public class ProductService {
         Catalog catalog =catalogRepository.findById(request.getCatalogId())
             .orElseThrow(()-> new RuntimeException("catalog not found"));
 
+        Catalog oldCatalog = existingProduct.getCatalog();
+
+        if(!oldCatalog.getId().equals(catalog.getId())){
+            oldCatalog.setUpdatedBy("system_user");
+            catalog.setUpdatedBy("system_user");
+        }
+
         existingProduct.setCatalog(catalog);
+
+        existingProduct.setStatus(request.getStatus());
         existingProduct.setName(request.getName());
         existingProduct.setPrice(request.getPrice());
         existingProduct.setStock(request.getStock());
         existingProduct.setUpdatedBy("system_user");
-        existingProduct.setUpdatedDate(LocalDateTime.now());
+     
 
         return productRepository.save(existingProduct);
     } 
@@ -79,12 +93,33 @@ public class ProductService {
             .filter(p->p.getStatus() != Status.DELETED)
             .orElseThrow(()-> new RuntimeException("undefined product"));
 
+        Catalog catalog = existingProduct.getCatalog();
+        catalog.setUpdatedBy("system_user");
+
         existingProduct.setStatus(Status.DELETED);
         existingProduct.setDeletedDate(LocalDateTime.now());
         existingProduct.setDeletedBy("system_user");
-
+        existingProduct.setUpdatedBy("sytem_user");
+        
         productRepository.save(existingProduct);
-
     }
+
+    //SEARCH
+    public List<Product> searchProducts(String id , String name, String catalogName,
+                                        String stockStatus, Status status,
+                                        java.math.BigDecimal minPrice , java.math.BigDecimal maxPrice){
+        // ACC-01: Arayüzden status seçilmezse varsayılan olarak ACTIVE ata
+        if(status == null){
+            status = Status.ACTIVE;
+        }
+
+        return productRepository.searchProducts(id, name, catalogName, stockStatus, status, minPrice, maxPrice);
+    
+     }
+
+
+
+
+
 
 }

@@ -1,7 +1,10 @@
 package com.crm.backend.dto;
 
+import com.crm.backend.model.enums.Status;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+
+
 import java.math.BigDecimal;
 
 
@@ -23,5 +26,7 @@ public class ProductRequest {
     @NotNull(message = "Stok boş bırakılamaz")
     @Min(value = 0, message = "Stok negatif olamaz")
     private Integer stock;
+
+    private Status status;
 
 }
