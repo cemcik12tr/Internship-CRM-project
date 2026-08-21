@@ -7,7 +7,6 @@ import com.crm.backend.exception.BadCredentialsExceptionWithAttempts;
 import com.crm.backend.repository.UserRepository;
 import com.crm.backend.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +22,6 @@ public class AuthServiceImpl implements AuthService {
     private static final long LOCKOUT_DURATION_SECONDS = 30;
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final Map<String, Long> lockoutCache = new ConcurrentHashMap<>();
 
     @Override
@@ -41,8 +39,8 @@ public class AuthServiceImpl implements AuthService {
         // 3. Fallback check for DB-level lock status
         verifyDatabaseLockState(user, email);
 
-        // 4. Validate credentials
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+        // 4. Validate credentials (Plain text comparison)
+        if (!user.getPassword().equals(loginRequest.getPassword())) {
             handleFailedLogin(user, email);
         }
 
@@ -97,6 +95,12 @@ public class AuthServiceImpl implements AuthService {
     private LoginResponse handleSuccessfulLogin(User user, String email) {
         lockoutCache.remove(email);
         userRepository.resetAttemptsDirectly(user.getId());
-        return new LoginResponse("Login successful!", user.getEmail(), MAX_ATTEMPTS);
+        return new LoginResponse(
+                "Login successful!",
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                MAX_ATTEMPTS
+        );
     }
 }
