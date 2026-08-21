@@ -22,6 +22,9 @@ public class Product
     @Column(name = "catalog_id") 
     private Long catalogId;
 
+    @Column(name = "customer_id")
+    private String customerId;
+
     @Column(name="sku" , unique = true, updatable = false)
     private String sku;
 
@@ -49,6 +52,12 @@ public class Product
     }
     public void setCatalogId(Long catalogId) {
         this.catalogId = catalogId;
+    }
+    public String getCustomerId() {
+        return customerId;
+    }
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
     }
     public String getName() {
         return name;

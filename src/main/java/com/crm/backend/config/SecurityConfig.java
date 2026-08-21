@@ -25,6 +25,7 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/customers/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
