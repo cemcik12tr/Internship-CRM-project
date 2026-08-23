@@ -15,10 +15,10 @@ import java.time.LocalDateTime;
 public class Catalog {
 
     @Id
-    @Column(name ="catalog_id", length = 20, nullable = false, updatable = false)
+    @Column(name ="catalog_id", length = 100, nullable = false, updatable = false)
     private String id;
 
-    @Column(name = "catalog_name", length= 20, unique = true, nullable = false)
+    @Column(name = "catalog_name", length= 100, unique = true, nullable = false)
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -38,4 +38,12 @@ public class Catalog {
 
     @Column(name = "updated_by",nullable = true, insertable = false)
     private String updatedBy;
+
+    @Column(name = "deleted_date") 
+    private LocalDateTime deletedDate;
+
+    @Column(name = "deleted_by")
+    private String deletedBy;
+
+
 }

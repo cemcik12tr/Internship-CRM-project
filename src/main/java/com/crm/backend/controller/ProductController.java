@@ -61,4 +61,9 @@ public class ProductController {
             id, name, catalogName, stockStatus, status, minPrice, maxPrice));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable String id){
+        Product product = productService.getProductById(id);
+        return ResponseEntity.ok(product);
+    }
 }

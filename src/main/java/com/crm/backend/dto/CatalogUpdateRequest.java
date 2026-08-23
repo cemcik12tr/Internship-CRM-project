@@ -14,6 +14,8 @@ public class CatalogUpdateRequest {
     @NotNull(message = "Status is mandatory")
     private Status status;
 
+
+
     public String getName(){
         return name;
     }
@@ -24,7 +26,6 @@ public class CatalogUpdateRequest {
         return status;
     }
     public void setStatus(Status status) {
-        this.status = status;
+        this.status = status;    
     }
-
 }

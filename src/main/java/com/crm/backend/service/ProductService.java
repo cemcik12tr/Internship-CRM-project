@@ -57,6 +57,12 @@ public class ProductService {
                 .toList();
     }
 
+    //READ single
+    public Product getProductById(String id){
+        return productRepository.findById(id)
+            .orElseThrow(()-> new RuntimeException("Ürün bulunamadı!"));
+    }
+
     //UPDATE
     @Transactional
     public Product updateProduct(String id, ProductRequest request){

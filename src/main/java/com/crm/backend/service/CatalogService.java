@@ -1,12 +1,14 @@
 package com.crm.backend.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import com.crm.backend.repository.CatalogRepository;
 import com.crm.backend.dto.CatalogRequest;
 import com.crm.backend.dto.CatalogUpdateRequest;
 import com.crm.backend.model.Catalog;
+
 import com.crm.backend.model.enums.Status;
 
 
@@ -61,6 +63,31 @@ public class CatalogService {
         return catalogRepository.save(existingCatalog);
         }
 
+        //GET
+        public List<Catalog> getAllCatalogs() {
+            return catalogRepository.findByStatusNot(Status.DELETED);
+        }
 
+        //READ SINGLE
+        public Catalog getCatalogById(String id){
+            return catalogRepository.findById(id)
+            .orElseThrow(()-> new RuntimeException("katalog bulunamadı!"));
+        }
+
+        //DELETE
+        public void deleteCatalog(String id){
+            Catalog existingCatalog = catalogRepository.findById(id)
+                .filter(p->p.getStatus() != Status.DELETED)
+                .orElseThrow(()-> new RuntimeException("undefined catalog"));
+
+            existingCatalog.setUpdatedBy("system_user");
+
+            existingCatalog.setStatus(Status.DELETED);
+            existingCatalog.setDeletedDate(LocalDateTime.now());
+            existingCatalog.setDeletedBy("system_user");
+            existingCatalog.setUpdatedBy("sytem_user");
+            
+        catalogRepository.save(existingCatalog);
+        }
     
 }
