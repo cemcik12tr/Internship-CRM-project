@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.crm.backend.customer.dto.UpdateCustomerRequest;
 import java.time.LocalDateTime;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -45,7 +48,7 @@ public class CustomerServiceImpl implements CustomerService {
 		customer.setMiddleName(isBlank(request.middleName()) ? null : request.middleName().trim());
 		customer.setLastName(request.lastName().trim());
 		customer.setStatus(CustomerStatus.ACTIVE);
-		customer.setCreatedBy("system");
+		customer.setCreatedBy(currentActor());
 
 		Customer savedCustomer = customerRepository.save(customer);
 		return new CreateCustomerResponse(savedCustomer.getCustomerId(),savedCustomer.getAccountNumber(),savedCustomer.getStatus().name());
@@ -126,9 +129,11 @@ public class CustomerServiceImpl implements CustomerService {
     	validateName(request.middleName(), "Middle name", false, errors);
     	validateName(request.lastName(), "Last name", true, errors);
 
-    	if (request.status() == null) {
-        	errors.add("Status is mandatory.");
-    	}
+		if (request.status() == null) {
+			errors.add("Status is mandatory.");
+		} else if (request.status() == CustomerStatus.DELETED) {
+			errors.add("Customer status cannot be changed to DELETED by update.");
+		}
 
     	if (!errors.isEmpty()) {
        	 throw new CustomerValidationException(errors);
@@ -139,6 +144,19 @@ public class CustomerServiceImpl implements CustomerService {
     	if (customerRepository.existsDuplicateGsm(gsmNumber.trim(),customerId,List.of(CustomerStatus.ACTIVE, CustomerStatus.DELETED))) {
         	throw new DuplicateCustomerException("GSM number already belongs to another customer.");
     	}
+	}
+
+	private String currentActor() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+		if (authentication == null
+				|| !authentication.isAuthenticated()
+				|| authentication instanceof AnonymousAuthenticationToken
+				|| "anonymousUser".equals(authentication.getName())) {
+			return "system";
+		}
+
+		return authentication.getName();
 	}
 
 	private void validateName(String value, String fieldName, boolean required, List<String> errors) {
@@ -210,31 +228,37 @@ public class CustomerServiceImpl implements CustomerService {
 	@Override
 	@Transactional
 	public CustomerDetailsResponse updateCustomer(String customerId,UpdateCustomerRequest request) {
-    	Customer customer = customerRepository.findByCustomerIdAndStatusNot(customerId, CustomerStatus.DELETED).orElseThrow(() -> new CustomerNotFoundException(customerId));
-    	validateUpdate(request);
-    	checkGsmDuplicate(customerId, request.gsmNumber());
+		Customer customer = customerRepository.findByCustomerIdAndStatusNot(customerId, CustomerStatus.DELETED).orElseThrow(() -> new CustomerNotFoundException(customerId));
+		validateUpdate(request);
+		checkGsmDuplicate(customerId, request.gsmNumber());
     	customer.setGsmNumber(request.gsmNumber().trim());
     	customer.setFirstName(request.firstName().trim());
-    	customer.setMiddleName(isBlank(request.middleName()) ? null : request.middleName().trim());
-    	customer.setLastName(request.lastName().trim());
-    	customer.setStatus(request.status());
-    	customer.setUpdatedDate(LocalDateTime.now());
-    	customer.setUpdatedBy("system");
-    	customerRepository.save(customer);
+		customer.setMiddleName(isBlank(request.middleName()) ? null : request.middleName().trim());
+		customer.setLastName(request.lastName().trim());
+		customer.setStatus(request.status());
+		customer.setUpdatedDate(LocalDateTime.now());
+		customer.setUpdatedBy(currentActor());
+		customerRepository.save(customer);
 
     	return getCustomerDetails(customerId);
 	}
 	@Override
 	@Transactional
 	public void softDeleteCustomer(String customerId) {
-    	Customer customer = customerRepository.findByCustomerIdAndStatusNot(customerId, CustomerStatus.DELETED)
-            .orElseThrow(() -> new CustomerNotFoundException(customerId));
+		Customer customer = customerRepository.findByCustomerIdAndStatusNot(customerId, CustomerStatus.DELETED)
+				.orElseThrow(() -> new CustomerNotFoundException(customerId));
 
-    	customer.setStatus(CustomerStatus.DELETED);
-    	customer.setDeletedDate(LocalDateTime.now());
-    	customer.setDeletedBy("system");
-    	customer.setUpdatedDate(LocalDateTime.now());
-    	customer.setUpdatedBy("system");
-   		 customerRepository.save(customer);
+		if (customer.getStatus() != CustomerStatus.ACTIVE) {
+			throw new CustomerValidationException(List.of("Only active customers can be deleted."));
+		}
+
+		LocalDateTime deletedAt = LocalDateTime.now();
+		String actor = currentActor();
+		customer.setStatus(CustomerStatus.DELETED);
+		customer.setDeletedDate(deletedAt);
+		customer.setDeletedBy(actor);
+		customer.setUpdatedDate(deletedAt);
+		customer.setUpdatedBy(actor);
+		customerRepository.save(customer);
 	}	
 }

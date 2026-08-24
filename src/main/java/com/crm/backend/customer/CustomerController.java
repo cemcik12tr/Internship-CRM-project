@@ -12,7 +12,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/customers")
-@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
+@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", methods = {
+		RequestMethod.GET,
+		RequestMethod.POST,
+		RequestMethod.PUT,
+		RequestMethod.DELETE,
+		RequestMethod.OPTIONS
+})
 public class CustomerController {
 
 	private final CustomerService customerService;
@@ -43,6 +49,11 @@ public class CustomerController {
 	@GetMapping
 	public List<CustomerSearchResultResponse> getCustomers() {
     	return customerService.getCustomers();
+	}
+
+	@GetMapping("/{customerId}")
+	public CustomerDetailsResponse getCustomerDetails(@PathVariable String customerId) {
+		return customerService.getCustomerDetails(customerId);
 	}
 
 	@PutMapping("/{customerId}")

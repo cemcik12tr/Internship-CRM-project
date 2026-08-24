@@ -11,6 +11,7 @@ import com.crm.backend.customer.dto.CreateCustomerResponse;
 import com.crm.backend.customer.dto.CustomerDetailsResponse;
 import com.crm.backend.customer.dto.CustomerSearchCriteria;
 import com.crm.backend.customer.dto.CustomerSearchResultResponse;
+import com.crm.backend.customer.dto.UpdateCustomerRequest;
 import com.crm.backend.model.Product;
 import com.crm.backend.repository.ProductRepository;
 import java.time.LocalDateTime;
@@ -151,6 +152,88 @@ class CustomerServiceTest {
 		assertThatThrownBy(() -> customerService.getCustomerDetails("CUST404"))
 				.isInstanceOf(CustomerNotFoundException.class)
 				.hasMessage("Customer not found: CUST404");
+	}
+
+	@Test
+	void shouldUpdateEditableCustomerInformation() {
+		Customer customer = customer("CUST100", "ACC100", "Duygu", null, "Yunus");
+		UpdateCustomerRequest request = new UpdateCustomerRequest(
+				"5551234568",
+				"Duygu",
+				"Ayse",
+				"Yilmaz",
+				CustomerStatus.INACTIVE
+		);
+
+		when(customerRepository.findByCustomerIdAndStatusNot("CUST100", CustomerStatus.DELETED))
+				.thenReturn(Optional.of(customer));
+		when(customerRepository.existsDuplicateGsm(
+				"5551234568", "CUST100", List.of(CustomerStatus.ACTIVE, CustomerStatus.DELETED)
+		)).thenReturn(false);
+		when(productRepository.findByCustomerIdAndIsActiveTrue("CUST100")).thenReturn(List.of());
+
+		CustomerDetailsResponse response = customerService.updateCustomer("CUST100", request);
+
+		assertThat(customer.getCustomerId()).isEqualTo("CUST100");
+		assertThat(customer.getAccountNumber()).isEqualTo("ACC100");
+		assertThat(customer.getNationalId()).isEqualTo("12345678901");
+		assertThat(customer.getGsmNumber()).isEqualTo("5551234568");
+		assertThat(customer.getMiddleName()).isEqualTo("Ayse");
+		assertThat(customer.getLastName()).isEqualTo("Yilmaz");
+		assertThat(customer.getStatus()).isEqualTo(CustomerStatus.INACTIVE);
+		assertThat(customer.getUpdatedDate()).isNotNull();
+		assertThat(customer.getUpdatedBy()).isEqualTo("system");
+		assertThat(response.status()).isEqualTo("INACTIVE");
+		verify(customerRepository).save(customer);
+	}
+
+	@Test
+	void shouldRejectDeletedStatusDuringUpdate() {
+		Customer customer = customer("CUST100", "ACC100", "Duygu", null, "Yunus");
+		UpdateCustomerRequest request = new UpdateCustomerRequest(
+				"5551234567",
+				"Duygu",
+				null,
+				"Yunus",
+				CustomerStatus.DELETED
+		);
+
+		when(customerRepository.findByCustomerIdAndStatusNot("CUST100", CustomerStatus.DELETED))
+				.thenReturn(Optional.of(customer));
+
+		assertThatThrownBy(() -> customerService.updateCustomer("CUST100", request))
+				.isInstanceOf(CustomerValidationException.class)
+				.hasMessage("Customer information is not valid.");
+	}
+
+	@Test
+	void shouldSoftDeleteAnActiveCustomer() {
+		Customer customer = customer("CUST100", "ACC100", "Duygu", null, "Yunus");
+
+		when(customerRepository.findByCustomerIdAndStatusNot("CUST100", CustomerStatus.DELETED))
+				.thenReturn(Optional.of(customer));
+
+		customerService.softDeleteCustomer("CUST100");
+
+		assertThat(customer.getStatus()).isEqualTo(CustomerStatus.DELETED);
+		assertThat(customer.getDeletedDate()).isNotNull();
+		assertThat(customer.getDeletedBy()).isEqualTo("system");
+		assertThat(customer.getUpdatedDate()).isEqualTo(customer.getDeletedDate());
+		assertThat(customer.getUpdatedBy()).isEqualTo("system");
+		verify(customerRepository).save(customer);
+	}
+
+	@Test
+	void shouldRejectSoftDeleteForAnInactiveCustomer() {
+		Customer customer = customer("CUST100", "ACC100", "Duygu", null, "Yunus");
+		customer.setStatus(CustomerStatus.INACTIVE);
+
+		when(customerRepository.findByCustomerIdAndStatusNot("CUST100", CustomerStatus.DELETED))
+				.thenReturn(Optional.of(customer));
+
+		assertThatThrownBy(() -> customerService.softDeleteCustomer("CUST100"))
+				.isInstanceOf(CustomerValidationException.class)
+				.hasMessage("Customer information is not valid.");
 	}
 
 	private Customer customer(String customerId, String accountNumber, String firstName, String middleName, String lastName) {
