@@ -1,5 +1,5 @@
 ---------------------------------------------------------
--- 1. USERS SEED DATA
+-- 1. USERS SEED DATA (Fırat'ın Kodu - DOKUNULMADI)
 ---------------------------------------------------------
 TRUNCATE TABLE public.users RESTART IDENTITY CASCADE;
 
@@ -22,7 +22,7 @@ SELECT
     CASE
         WHEN random() < 0.05 THEN NOW() - ((random() * 10)::int || ' days')::interval
         ELSE NULL
-END AS deleted_date,
+    END AS deleted_date,
     'user' || gs || '@company.com' AS email,
     'user' || gs || '@company.com' AS username,
     (ARRAY['Ahmet', 'Mehmet', 'Can', 'Zeynep', 'Elif', 'Ayşe', 'Deniz', 'Emre', 'Burak', 'Selin'])[((gs % 10) + 1)] AS first_name,
@@ -35,28 +35,47 @@ FROM generate_series(1, 1000) gs;
 
 
 ---------------------------------------------------------
--- 2. PRODUCTS SEED DATA
+-- 2. CATALOGS SEED DATA
 ---------------------------------------------------------
-TRUNCATE TABLE public.products RESTART IDENTITY CASCADE;
+TRUNCATE TABLE public.catalogs CASCADE;
 
+-- KOLONLAR ENTITY'YE GÖRE DÜZENLENDİ: catalog_id, catalog_name
+INSERT INTO public.catalogs (catalog_id, catalog_name, status, created_date, updated_date)
+SELECT
+    'CAT-' || LPAD(gs::text, 4, '0'),
+    'Kategori ' || gs,
+    'ACTIVE',
+    NOW() - ((random() * 365)::int || ' days')::interval,
+    NOW()
+FROM generate_series(1, 10) gs;
+
+
+---------------------------------------------------------
+-- 3. PRODUCTS SEED DATA
+---------------------------------------------------------
+TRUNCATE TABLE public.products CASCADE;
+
+-- KOLONLAR ENTITY'YE GÖRE DÜZENLENDİ: product_id, product_name, stock_status
 INSERT INTO public.products (
+    product_id,
     catalog_id,
     created_date,
     deleted_date,
-    name,
+    product_name,
     price,
-    stock,
+    stock_status,
     updated_date,
-    is_active
+    status
 )
 SELECT
-    (random() * 9 + 1)::int AS catalog_id,
-    NOW() - ((random() * 730)::int || ' days')::interval AS created_date,
+    'PRD-' || LPAD(gs::text, 4, '0'),
+    'CAT-' || LPAD((floor(random() * 9) + 1)::text, 4, '0'),
+    NOW() - ((random() * 730)::int || ' days')::interval,
     CASE
         WHEN random() < 0.05
             THEN NOW() - ((random() * 180)::int || ' days')::interval
         ELSE NULL
-END AS deleted_date,
+    END AS deleted_date,
     CASE (random() * 7)::int
         WHEN 0 THEN 'Laptop ' || gs
         WHEN 1 THEN 'Phone ' || gs
@@ -66,7 +85,7 @@ END AS deleted_date,
         WHEN 5 THEN 'Tablet ' || gs
         WHEN 6 THEN 'Headset ' || gs
         ELSE 'Camera ' || gs
-END AS name,
+    END AS product_name,
     CASE (random() * 7)::int
         WHEN 0 THEN ROUND((700 + random() * 4300)::numeric, 2)::float8
         WHEN 1 THEN ROUND((500 + random() * 3500)::numeric, 2)::float8
@@ -76,7 +95,7 @@ END AS name,
         WHEN 5 THEN ROUND((350 + random() * 2200)::numeric, 2)::float8
         WHEN 6 THEN ROUND((60 + random() * 550)::numeric, 2)::float8
         ELSE ROUND((600 + random() * 3200)::numeric, 2)::float8
-END AS price,
+    END AS price,
     CASE (random() * 7)::int
         WHEN 0 THEN (10 + random() * 40)::int
         WHEN 1 THEN (15 + random() * 70)::int
@@ -86,44 +105,38 @@ END AS price,
         WHEN 5 THEN (20 + random() * 80)::int
         WHEN 6 THEN (30 + random() * 120)::int
         ELSE (5 + random() * 50)::int
-END AS stock,
+    END AS stock_status,
     NOW() - ((random() * 365)::int || ' days')::interval AS updated_date,
-    random() > 0.10 AS is_active
+    CASE WHEN random() > 0.10 THEN 'ACTIVE' ELSE 'INACTIVE' END AS status
 FROM generate_series(1, 1000) gs;
 
--- OUTLIER: Çok pahalı ürünler
+-- OUTLIER (Uç Değer) Veriler
 UPDATE public.products
 SET price = ROUND((25000 + random() * 25000)::numeric, 2)::float8
-WHERE id IN (15, 87, 154, 488, 721);
+WHERE product_id IN ('PRD-0015', 'PRD-0087', 'PRD-0154', 'PRD-0488', 'PRD-0721');
 
--- OUTLIER: Çok yüksek stok
 UPDATE public.products
-SET stock = 4000 + (random() * 3000)::int
-WHERE id IN (12, 90, 311, 555, 777);
+SET stock_status = 4000 + (random() * 3000)::int
+WHERE product_id IN ('PRD-0012', 'PRD-0090', 'PRD-0311', 'PRD-0555', 'PRD-0777');
 
--- Stoku bitmiş ürünler (%8)
 UPDATE public.products
-SET stock = 0
+SET stock_status = 0
 WHERE random() < 0.08;
 
--- Veri kalitesi problemi: Negatif stok
 UPDATE public.products
-SET stock = -5
-WHERE id IN (45, 222, 901);
+SET stock_status = -5
+WHERE product_id IN ('PRD-0045', 'PRD-0222', 'PRD-0901');
 
--- Veri kalitesi problemi: Fiyat 0
 UPDATE public.products
 SET price = 0
-WHERE id IN (101, 202, 303);
+WHERE product_id IN ('PRD-0101', 'PRD-0202', 'PRD-0303');
 
--- Güncellenmemiş ürünler (%20)
 UPDATE public.products
 SET updated_date = created_date
 WHERE random() < 0.20;
 
--- Bazı pasif ürünleri silinmiş olarak işaretle
 UPDATE public.products
 SET deleted_date = NOW() - ((random() * 120)::int || ' days')::interval
-WHERE is_active = false
+WHERE status = 'INACTIVE'
   AND deleted_date IS NULL
   AND random() < 0.40;

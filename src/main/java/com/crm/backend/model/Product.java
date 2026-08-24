@@ -1,103 +1,65 @@
 package com.crm.backend.model;
 
+import com.crm.backend.model.enums.Status;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.CreationTimestamp;
 
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Products")
 @Data
-@SQLDelete(sql= " UPDATE products SET is_active = false WHERE id=?")
-@SQLRestriction("is_active=true")
 
 public class Product
  {
     @Id 
-    @GeneratedValue(strategy = GenerationType.IDENTITY) 
-    private Long id;
+    @Column(name = "product_id",length=20, nullable = false, updatable = false)
+    private String id;//artık longArtık Long ve otomatik artan değil, PRD-001 gibi üretiliyor.
+    //sku artık id ile bir
 
-    @Column(name = "catalog_id") 
-    private Long catalogId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "catalog_id",nullable = false)
+    private Catalog catalog;
 
-    @Column(name="sku" , unique = true, updatable = false)
-    private String sku;
-
+    @Column(name = "product_name", length = 100 , nullable = false)
     private String name;
-    private Double price;
+
+    @Column(name = "price", nullable = false, precision = 10, scale = 2 )
+    private BigDecimal price;
+
+    @Column(name = "stock_status", nullable = false)
     private Integer stock;
 
-    @Column(name = "is_active")
-    private Boolean isActive;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status = Status.ACTIVE;
     
-    @Column(name = "created_date") private LocalDateTime createdDate;
-    @Column(name = "updated_date") private LocalDateTime updatedDate;
-    @Column(name = "deleted_date") private LocalDateTime deletedDate;
+    @CreationTimestamp
+    @Column(name = "created_date", updatable = false) 
+    private LocalDateTime createdDate;
+   
+    @Column(name = "created_by", updatable = false)
+    private String createdBy;
 
+   
+    @Column(name = "updated_date" , nullable = true, insertable = false) 
+    private LocalDateTime updatedDate;
 
+    @Column(name = "updated_by")
+    private String updatedBy;
+   
+    @Column(name = "deleted_date") 
+    private LocalDateTime deletedDate;
 
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public Long getCatalogId() {
-        return catalogId;
-    }
-    public void setCatalogId(Long catalogId) {
-        this.catalogId = catalogId;
-    }
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-    public Double getPrice() {
-        return price;
-    }
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-    public Integer getStock() {
-        return stock;
-    }
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-    public LocalDateTime getUpdatedDate() {
-        return updatedDate;
-    }
-    public void setUpdatedDate(LocalDateTime updatedDate) {
-        this.updatedDate = updatedDate;
-    }
-    public LocalDateTime getDeletedDate() {
-        return deletedDate;
-    }
-    public void setDeletedDate(LocalDateTime deletedDate) {
-        this.deletedDate = deletedDate;
-    }
-    public Boolean getIsActive() {
-        return isActive;
-    }
-    public void setIsActive(Boolean isActive) {
-        this.isActive = isActive;
-    }
-    public void setSku(String sku) {
-        this.sku = sku;
-    }
-    public String getSku() {
-        return sku;
-    }
+    @Column(name = "deleted_by")
+    private String deletedBy;
 
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedDate = LocalDateTime.now();
+    }
 
 }
