@@ -4,7 +4,7 @@ import com.crm.backend.model.enums.Status;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -44,7 +44,7 @@ public class Product
     @Column(name = "created_by", updatable = false)
     private String createdBy;
 
-    @UpdateTimestamp
+   
     @Column(name = "updated_date" , nullable = true, insertable = false) 
     private LocalDateTime updatedDate;
 
@@ -57,6 +57,9 @@ public class Product
     @Column(name = "deleted_by")
     private String deletedBy;
 
-
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedDate = LocalDateTime.now();
+    }
 
 }
