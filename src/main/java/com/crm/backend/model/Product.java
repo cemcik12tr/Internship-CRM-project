@@ -17,8 +17,7 @@ public class Product
  {
     @Id 
     @Column(name = "product_id",length=20, nullable = false, updatable = false)
-    private String id;//artık longArtık Long ve otomatik artan değil, PRD-001 gibi üretiliyor.
-    //sku artık id ile bir
+    private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "catalog_id",nullable = false)

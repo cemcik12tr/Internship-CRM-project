@@ -13,6 +13,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String> {
 
+    boolean existsByNameIgnoreCaseAndCatalogId(String name, String catalogId);
+
+    boolean existsByNameIgnoreCaseAndCatalogIdAndIdNot(String name, String catalogId, String id);
+    
     @Query("SELECT p FROM Product p WHERE p.status != 'DELETED'" +
         "AND (:id IS NULL OR p.id = :id) " +
         "AND (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%',CAST(:name AS String) ,'%')))"+
