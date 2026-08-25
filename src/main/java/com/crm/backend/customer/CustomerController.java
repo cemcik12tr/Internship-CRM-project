@@ -66,4 +66,10 @@ public class CustomerController {
 	public void softDeleteCustomer(@PathVariable String customerId) {
     	customerService.softDeleteCustomer(customerId);
 	}
+	@PostMapping("/{customerId}/products/{productId}")
+	public CustomerDetailsResponse addProductToCustomer(
+        	@PathVariable String customerId,
+        	@PathVariable Long productId) {
+    	return customerService.addProductToCustomer(customerId, productId);
+	}
 }

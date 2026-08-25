@@ -261,4 +261,16 @@ public class CustomerServiceImpl implements CustomerService {
 		customer.setUpdatedBy(actor);
 		customerRepository.save(customer);
 	}	
+	@Override
+	@Transactional
+	public CustomerDetailsResponse addProductToCustomer(String customerId, Long productId) {
+    	Customer customer = customerRepository
+            	.findByCustomerIdAndStatusNot(customerId, CustomerStatus.DELETED)
+            	.orElseThrow(() -> new CustomerNotFoundException(customerId));
+   	 	Product product = productRepository.findById(productId)
+           	 	.orElseThrow(() -> new RuntimeException("Product not found: " + productId));
+    	product.setCustomerId(customer.getCustomerId());
+    	productRepository.save(product);
+    	return getCustomerDetails(customerId);
+	}
 }
