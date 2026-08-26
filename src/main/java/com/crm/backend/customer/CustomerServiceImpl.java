@@ -90,6 +90,8 @@ public class CustomerServiceImpl implements CustomerService {
 				customer.getStatus().name(),
 				customer.getCreatedDate(),
 				customer.getCreatedBy(),
+				customer.getUpdatedDate(),
+				customer.getUpdatedBy(),
 				products
 		);
 	}
