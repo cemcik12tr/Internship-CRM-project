@@ -40,7 +40,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
         @Param("maxPrice") java.math.BigDecimal maxPrice
     );
 
-    List<Product> findByCustomerIdAndIsActiveTrue(String customerId);
+    List<Product> findByCustomerIdAndStatus(String customerId, Status status);
 
 }
 

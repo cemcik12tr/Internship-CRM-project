@@ -133,7 +133,7 @@ class CustomerServiceTest {
 
 		when(customerRepository.findByCustomerIdAndStatusNot("CUST100", CustomerStatus.DELETED))
 				.thenReturn(Optional.of(customer));
-		when(productRepository.findByCustomerIdAndIsActiveTrue("CUST100")).thenReturn(List.of(product));
+		when(productRepository.findByCustomerIdAndStatus("CUST100", Status.ACTIVE)).thenReturn(List.of(product));
 
 		CustomerDetailsResponse details = customerService.getCustomerDetails("CUST100");
 
@@ -171,7 +171,7 @@ class CustomerServiceTest {
 		when(customerRepository.existsDuplicateGsm(
 				"5551234568", "CUST100", List.of(CustomerStatus.ACTIVE, CustomerStatus.DELETED)
 		)).thenReturn(false);
-		when(productRepository.findByCustomerIdAndIsActiveTrue("CUST100")).thenReturn(List.of());
+		when(productRepository.findByCustomerIdAndStatus("CUST100", Status.ACTIVE)).thenReturn(List.of());
 
 		CustomerDetailsResponse response = customerService.updateCustomer("CUST100", request);
 

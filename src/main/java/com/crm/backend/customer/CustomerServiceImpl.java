@@ -7,6 +7,7 @@ import com.crm.backend.customer.dto.CustomerProductResponse;
 import com.crm.backend.customer.dto.CustomerSearchCriteria;
 import com.crm.backend.customer.dto.CustomerSearchResultResponse;
 import com.crm.backend.model.Product;
+import com.crm.backend.model.enums.Status;
 import com.crm.backend.repository.ProductRepository;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -75,7 +76,7 @@ public class CustomerServiceImpl implements CustomerService {
 	public CustomerDetailsResponse getCustomerDetails(String customerId) {
 		Customer customer = customerRepository.findByCustomerIdAndStatusNot(customerId, CustomerStatus.DELETED).orElseThrow(() -> new CustomerNotFoundException(customerId));
 
-		List<CustomerProductResponse> products = productRepository.findByCustomerIdAndIsActiveTrue(customer.getCustomerId())
+		List<CustomerProductResponse> products = productRepository.findByCustomerIdAndStatus(customer.getCustomerId(), Status.ACTIVE)
 				.stream().map(this::toProductResponse).toList();
 
 		return new CustomerDetailsResponse(
