@@ -14,6 +14,8 @@ public record CustomerDetailsResponse(
 		String status,
 		LocalDateTime createdDate,
 		String createdBy,
+		LocalDateTime updatedDate,
+		String updatedBy,
 		List<CustomerProductResponse> products
 ) {
 }
