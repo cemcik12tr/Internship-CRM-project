@@ -56,6 +56,12 @@ public class Customer {
 	@Column(name = "deleted_date")
 	private LocalDateTime deletedDate;
 
+	@Column(name = "updated_by", length = 100)
+	private String updatedBy;
+
+	@Column(name = "deleted_by", length = 100)
+	private String deletedBy;
+
 	@PrePersist
 	void prePersist() {
 		if (status == null) {
@@ -168,4 +174,18 @@ public class Customer {
 	public void setDeletedDate(LocalDateTime deletedDate) {
 		this.deletedDate = deletedDate;
 	}
+	public String getUpdatedBy() {
+    	return updatedBy;
+	}
+
+	public void setUpdatedBy(String updatedBy) {
+    	this.updatedBy = updatedBy;
+	}
+	public String getDeletedBy() {
+    	return deletedBy;
+	}
+	public void setDeletedBy(String deletedBy) {
+    	this.deletedBy = deletedBy;
+	}
+
 }

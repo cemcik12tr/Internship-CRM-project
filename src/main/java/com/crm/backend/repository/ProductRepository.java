@@ -1,9 +1,11 @@
 package com.crm.backend.repository;
 
 import com.crm.backend.model.Product;
+
 import com.crm.backend.model.enums.Status;
 
 import java.util.List;
+
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -38,4 +40,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
         @Param("maxPrice") java.math.BigDecimal maxPrice
     );
 
+    List<Product> findByCustomerIdAndIsActiveTrue(String customerId);
+
 }
+
