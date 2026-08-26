@@ -45,7 +45,14 @@ public class ProductService {
         product.setCreatedBy("system_user");
         catalog.setUpdatedBy("system_user");
         catalog.setUpdatedDate(LocalDateTime.now());
+        String trimmedName = request.getName().trim();
         
+        if (productRepository.existsByNameIgnoreCaseAndCatalogId(trimmedName, request.getCatalogId())) {
+            // Jira US-10 ACC-04 Hata Mesajı
+            throw new RuntimeException("A product with this name already exists in the selected catalog."); 
+        }
+
+
         catalogRepository.save(catalog);
         return productRepository.save(product);
     }
@@ -88,6 +95,12 @@ public class ProductService {
         existingProduct.setPrice(request.getPrice());
         existingProduct.setStock(request.getStock());
         existingProduct.setUpdatedBy("system_user");
+
+        String trimmedName = request.getName().trim();
+
+        if (productRepository.existsByNameIgnoreCaseAndCatalogIdAndIdNot(trimmedName, request.getCatalogId(), id)) {
+             throw new RuntimeException("A product with this name already exists in the selected catalog.");
+        }
      
 
         return productRepository.save(existingProduct);
