@@ -21,6 +21,12 @@ public class CustomerExceptionHandler {
 		return new ErrorResponse("DUPLICATE_CUSTOMER", List.of(exception.getMessage()));
 	}
 
+	@ExceptionHandler(CustomerNotFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorResponse handleCustomerNotFoundException(CustomerNotFoundException exception) {
+		return new ErrorResponse("CUSTOMER_NOT_FOUND", List.of(exception.getMessage()));
+	}
+
 	public record ErrorResponse(String code, List<String> messages) {
 	}
 }

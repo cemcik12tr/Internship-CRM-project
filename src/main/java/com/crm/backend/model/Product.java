@@ -17,12 +17,16 @@ public class Product
  {
     @Id 
     @Column(name = "product_id",length=20, nullable = false, updatable = false)
-    private String id;//artık longArtık Long ve otomatik artan değil, PRD-001 gibi üretiliyor.
-    //sku artık id ile bir
+    private String id;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "catalog_id",nullable = false)
     private Catalog catalog;
+
+    @Column(name = "customer_id")
+    private String customerId;
+
 
     @Column(name = "product_name", length = 100 , nullable = false)
     private String name;
@@ -54,8 +58,16 @@ public class Product
     @Column(name = "deleted_date") 
     private LocalDateTime deletedDate;
 
+
     @Column(name = "deleted_by")
     private String deletedBy;
+
+    public String getCustomerId() {
+        return customerId;
+    }
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
+    }
 
     @PreUpdate
     protected void onUpdate() {
