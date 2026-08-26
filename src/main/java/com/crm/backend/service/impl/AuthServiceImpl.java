@@ -1,5 +1,6 @@
 package com.crm.backend.service.impl;
 
+import com.crm.backend.config.JwtUtil;
 import com.crm.backend.dto.LoginRequest;
 import com.crm.backend.dto.LoginResponse;
 import com.crm.backend.entity.User;
@@ -22,6 +23,7 @@ public class AuthServiceImpl implements AuthService {
     private static final long LOCKOUT_DURATION_SECONDS = 30;
 
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
     private final Map<String, Long> lockoutCache = new ConcurrentHashMap<>();
 
     @Override
@@ -95,7 +97,11 @@ public class AuthServiceImpl implements AuthService {
     private LoginResponse handleSuccessfulLogin(User user, String email) {
         lockoutCache.remove(email);
         userRepository.resetAttemptsDirectly(user.getId());
+
+        String token = jwtUtil.generateToken(user.getEmail());
+
         return new LoginResponse(
+                token,
                 "Login successful!",
                 user.getEmail(),
                 user.getFirstName(),
