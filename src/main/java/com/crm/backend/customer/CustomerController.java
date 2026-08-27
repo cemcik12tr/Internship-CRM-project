@@ -72,4 +72,11 @@ public class CustomerController {
         	@PathVariable String productId) {
     	return customerService.addProductToCustomer(customerId, productId);
 	}
+	@DeleteMapping("/{customerId}/products/{productId}")
+	public CustomerDetailsResponse removeProductFromCustomer(
+        	@PathVariable String customerId,
+        	@PathVariable String productId) {
+
+    	return customerService.removeProductFromCustomer(customerId, productId);
+	}
 }

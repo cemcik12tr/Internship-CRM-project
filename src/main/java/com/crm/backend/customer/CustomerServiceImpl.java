@@ -290,4 +290,19 @@ public class CustomerServiceImpl implements CustomerService {
     	productRepository.save(product);
     	return getCustomerDetails(customerId);
 	}
+	@Override
+	@Transactional
+	public CustomerDetailsResponse removeProductFromCustomer(String customerId, String productId) {
+    	Customer customer = customerRepository
+            	.findByCustomerIdAndStatusNot(customerId, CustomerStatus.DELETED)
+            	.orElseThrow(() -> new CustomerNotFoundException(customerId));
+    	Product product = productRepository.findById(productId)
+            	.orElseThrow(() -> new RuntimeException("Product not found: " + productId));
+    	if (!customer.getCustomerId().equals(product.getCustomerId())) {
+        	throw new RuntimeException("Product does not belong to this customer.");
+    	}
+   	 	product.setCustomerId(null);
+    	productRepository.save(product);
+    	return getCustomerDetails(customerId);
+	}
 }

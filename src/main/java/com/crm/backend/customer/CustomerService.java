@@ -18,4 +18,5 @@ public interface CustomerService {
 	CustomerDetailsResponse updateCustomer(String customerId,UpdateCustomerRequest request);
 	void softDeleteCustomer(String customerId);
 	CustomerDetailsResponse addProductToCustomer(String customerId, String productId);
+	CustomerDetailsResponse removeProductFromCustomer(String customerId, String productId);
 }
