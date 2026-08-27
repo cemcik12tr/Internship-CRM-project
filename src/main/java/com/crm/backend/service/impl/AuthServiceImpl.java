@@ -29,14 +29,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(noRollbackFor = BadCredentialsExceptionWithAttempts.class)
     public LoginResponse authenticateUser(LoginRequest loginRequest) {
-        String email = loginRequest.getUsername();
+        String email = loginRequest.getUsername() != null ? loginRequest.getUsername().trim().toLowerCase() : "";
 
         // 1. Validate if 30-second lockout is still active or expired
         checkAndHandleLockout(email);
 
-        // 2. Fetch user or throw error
+        // 2. Fetch user from DB; if not found, fail immediately with custom message and no attempt count
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadCredentialsExceptionWithAttempts("Invalid email or password.", MAX_ATTEMPTS));
+                .orElseThrow(() -> new BadCredentialsExceptionWithAttempts("Please use a valid email address.", null));
 
         // 3. Fallback check for DB-level lock status
         verifyDatabaseLockState(user, email);
