@@ -4,9 +4,10 @@ import lombok.Getter;
 
 @Getter
 public class BadCredentialsExceptionWithAttempts extends RuntimeException {
-    private final int attemptsRemaining;
 
-    public BadCredentialsExceptionWithAttempts(String message, int attemptsRemaining) {
+    private final Integer attemptsRemaining;
+
+    public BadCredentialsExceptionWithAttempts(String message, Integer attemptsRemaining) {
         super(message);
         this.attemptsRemaining = attemptsRemaining;
     }
