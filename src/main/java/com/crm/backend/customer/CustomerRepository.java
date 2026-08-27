@@ -14,7 +14,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
 	@Query("""
 			select customer from Customer customer
-			where customer.status <> :deletedStatus
+			where customer.status = :activeStatus
 			and (:customerId is null or customer.customerId = :customerId)
 			and (:nationalId is null or customer.nationalId = :nationalId)
 			and (:gsmNumber is null or customer.gsmNumber = :gsmNumber)
@@ -32,9 +32,10 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 			@Param("firstName") String firstName,
 			@Param("middleName") String middleName,
 			@Param("lastName") String lastName,
-			@Param("deletedStatus") CustomerStatus deletedStatus
+			@Param("activeStatus") CustomerStatus activeStatus
 	);
 	List<Customer> findAllByStatusNotOrderByCreatedDateDesc(CustomerStatus status);
+	List<Customer> findAllByStatusOrderByCreatedDateDesc(CustomerStatus status);
 	java.util.Optional<Customer> findByCustomerIdAndStatusNot(String customerId, CustomerStatus status);
 
 	@Query("""
@@ -45,4 +46,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
         and customer.status in :statuses
         """)
 	boolean existsDuplicateGsm(@Param("gsmNumber") String gsmNumber,@Param("customerId") String customerId,@Param("statuses") List<CustomerStatus> statuses);
+	boolean existsByNationalIdAndStatusIn(String nationalId,List<CustomerStatus> statuses);
+
+ 	boolean existsByGsmNumberAndStatusIn(String gsmNumber,List<CustomerStatus> statuses);
 }

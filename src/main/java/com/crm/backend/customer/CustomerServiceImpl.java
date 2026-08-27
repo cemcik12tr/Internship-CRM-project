@@ -67,7 +67,7 @@ public class CustomerServiceImpl implements CustomerService {
 				normalizedCriteria.firstName(),
 				normalizedCriteria.middleName(),
 				normalizedCriteria.lastName(),
-				CustomerStatus.DELETED
+				CustomerStatus.ACTIVE
 		).stream().map(this::toSearchResult).toList();
 	}
 
@@ -115,28 +115,33 @@ public class CustomerServiceImpl implements CustomerService {
 	}
 
 	private void checkDuplicates(CreateCustomerRequest request) {
-		if (customerRepository.existsByNationalIdAndStatus(request.nationalId().trim(), CustomerStatus.ACTIVE)
-					|| customerRepository.existsByGsmNumberAndStatus(request.gsmNumber().trim(), CustomerStatus.ACTIVE)) {
-				throw new DuplicateCustomerException("Customer already exists.");
-			}
-		}
 
-		private void validateUpdate(UpdateCustomerRequest request) {
+    List<CustomerStatus> duplicateStatuses =
+            List.of(CustomerStatus.ACTIVE, CustomerStatus.DELETED);
+
+    	if (customerRepository.existsByNationalIdAndStatusIn(request.nationalId().trim(),duplicateStatuses)) {
+
+        	throw new DuplicateCustomerException( "National ID already belongs to another customer.");
+   	 }
+    	if (customerRepository.existsByGsmNumberAndStatusIn(request.gsmNumber().trim(), duplicateStatuses)) {
+        	throw new DuplicateCustomerException("GSM number already belongs to another customer.");
+    	}
+	}
+	private void validateUpdate(UpdateCustomerRequest request) {
     	List<String> errors = new ArrayList<>();
-
     	if (isBlank(request.gsmNumber()) || !request.gsmNumber().matches("^5\\d{9}$")) {
-        	errors.add("GSM number must be in a valid format: 5XXXXXXXXX.");
-   		}
+        		errors.add("GSM number must be in a valid format: 5XXXXXXXXX.");
+    	}
 
     	validateName(request.firstName(), "First name", true, errors);
     	validateName(request.middleName(), "Middle name", false, errors);
     	validateName(request.lastName(), "Last name", true, errors);
 
-		if (request.status() == null) {
-			errors.add("Status is mandatory.");
-		} else if (request.status() == CustomerStatus.DELETED) {
-			errors.add("Customer status cannot be changed to DELETED by update.");
-		}
+    	if (request.status() == null) {
+        	errors.add("Status is mandatory.");
+    	} else if (request.status() == CustomerStatus.DELETED) {
+        	errors.add("Customer status cannot be changed to DELETED by update.");
+    	}
 
     	if (!errors.isEmpty()) {
        	 throw new CustomerValidationException(errors);
@@ -230,7 +235,11 @@ public class CustomerServiceImpl implements CustomerService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<CustomerSearchResultResponse> getCustomers() {
-    	return customerRepository.findAllByStatusNotOrderByCreatedDateDesc(CustomerStatus.DELETED).stream().map(this::toSearchResult).toList();
+    	return customerRepository
+            	.findAllByStatusOrderByCreatedDateDesc(CustomerStatus.ACTIVE)
+            	.stream()
+            	.map(this::toSearchResult)
+            	.toList();
 	}
 
 	@Override
